@@ -1,4 +1,4 @@
-__version__ = '1.0.2'
+__version__ = '1.0.3'
 
 import os
 import zipfile
@@ -146,7 +146,7 @@ def main():
         except ImportError:
             raise ImportError("[telethon_up]:Failed to import Telethon even after installation")
 
-if __name__ == "__main__":
-    main()
+main()
+
 
 
