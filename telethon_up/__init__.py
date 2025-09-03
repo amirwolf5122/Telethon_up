@@ -37,7 +37,7 @@ def download_api_tl(temp_dir):
 def download_and_update_telethon(api_tl_path, latest_layer):
     #Download and update Telethon source with pre-downloaded api.tl
     
-    telethon_zip_url = "https://github.com/amirwolf5122/Telethon/archive/1v.zip"
+    telethon_zip_url = "https://github.com/amirwolf5122/Telethon/archive/v1.zip"
     
     with tempfile.NamedTemporaryFile(delete=False, suffix='.zip') as tmp_file:
         zip_path = tmp_file.name
@@ -148,3 +148,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
