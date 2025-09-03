@@ -3,7 +3,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 setup(
     name="telethon_up",
-    version="1.0.9",
+    version="1.1.0",
     description="Full-featured Telegram client library for Python 3",
     packages=find_packages(),
     install_requires=[],
@@ -27,6 +27,7 @@ setup(
     ],
     keywords='telegram api chat client library messaging mtproto',
 )
+
 
 
 
