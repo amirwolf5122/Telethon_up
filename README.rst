@@ -15,6 +15,7 @@ as a user or through a bot account (bot API alternative).
     As with any third-party library for Telegram, be careful not to
     break `Telegram's ToS`_ or `Telegram can ban the account`_.
 
+
 What is this?
 -------------
 
@@ -23,6 +24,11 @@ to make it easy for you to write Python programs that can interact
 with Telegram. Think of it as a wrapper that has already done the
 heavy job for you, so you can focus on developing an application.
 
+
+What telethon-up does:3
+-------------
+
+⭐️The purpose of telethon-up is that it automatically updates the TL layer (api.tl) to the latest version of Telegram⭐️:3
 
 Installing
 ----------
@@ -87,4 +93,5 @@ useful information.
 .. |logo| image:: logo.svg
     :width: 24pt
     :height: 24pt
+
 
