@@ -1,5 +1,3 @@
-__version__ = '1.0.3'
-
 import os
 import zipfile
 import urllib.request
@@ -147,6 +145,7 @@ def main():
             raise ImportError("[telethon_up]:Failed to import Telethon even after installation")
 
 main()
+
 
 
 
