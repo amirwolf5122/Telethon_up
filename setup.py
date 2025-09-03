@@ -11,6 +11,7 @@ setup(
     author_email="amirwolf512@gmail.com",
     license='MIT',
     python_requires='>=3.5',
+    url='https://github.com/amirwolf5122/Telethon_up',
     long_description=long_description,
     long_description_content_type="text/markdown",
     classifiers=[
@@ -26,6 +27,7 @@ setup(
     ],
     keywords='telegram api chat client library messaging mtproto',
 )
+
 
 
 
