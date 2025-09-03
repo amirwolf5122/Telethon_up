@@ -29,7 +29,7 @@ Installing
 
 .. code-block:: sh
 
-  pip3 install telethon_up
+  pip3 install telethon-up
 
 
 Creating a client
@@ -86,3 +86,4 @@ useful information.
 .. |logo| image:: logo.svg
     :width: 24pt
     :height: 24pt
+
