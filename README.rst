@@ -38,6 +38,7 @@ Creating a client
 .. code-block:: python
 
     import telethon_up
+    # telethon_up.chack()
     # Automatically update the Telethon API layer (api.tl).
     from telethon import TelegramClient, events, sync
     # These example values won't work. You must get your own api_id and

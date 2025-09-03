@@ -1,3 +1,4 @@
+
 import os
 import zipfile
 import urllib.request
@@ -6,7 +7,7 @@ import subprocess
 import tempfile
 import shutil
 import re
-
+import importlib
 def get_layer_from_api_tl(api_tl_path):
     #Get LAYER version from api.tl file
     try:
@@ -104,8 +105,14 @@ def download_and_update_telethon(api_tl_path, latest_layer):
                 shutil.rmtree(extract_dir, ignore_errors=True)
         except:
             pass
-
-def main():
+def force_reload_telethon():
+    to_delete = [name for name in sys.modules if name.startswith("telethon.")]
+    for name in to_delete:
+        sys.modules.pop(name, None)
+    sys.modules.pop("telethon", None)
+    telethon = importlib.import_module("telethon")
+    return telethon
+def chack():
     with tempfile.TemporaryDirectory() as temp_dir:
         # Download api.tl once
         api_tl_path = download_api_tl(temp_dir)
@@ -119,8 +126,8 @@ def main():
             return
             
         try:
-            from telethon.tl.alltlobjects import LAYER
-            current_layer = LAYER
+            from telethon.tl import alltlobjects
+            current_layer = alltlobjects.LAYER
             if current_layer < latest_layer:
                 print(f"[telethon_up]:Updating Telethon from layer {current_layer} to {latest_layer}...")
                 success = download_and_update_telethon(api_tl_path, latest_layer)
@@ -139,14 +146,13 @@ def main():
         
         # Final verification
         try:
-            from telethon.tl.alltlobjects import LAYER
-            print(f"[telethon_up]:Final Telethon LAYER version: {LAYER}")
+            telethon = force_reload_telethon()
+            import telethon
+            print(f"[telethon_up]:Final Telethon LAYER version: {telethon.tl.alltlobjects.LAYER}")
         except ImportError:
             raise ImportError("[telethon_up]:Failed to import Telethon even after installation")
 
-main()
-
-
+chack()
 
 
 
