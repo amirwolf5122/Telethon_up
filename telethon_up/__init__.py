@@ -46,7 +46,8 @@ def download_and_update_telethon(api_tl_path, latest_layer):
         urllib.request.urlretrieve(telethon_zip_url, zip_path)
         
         # Extract to temporary directory
-        extract_dir = "Telethon_temp"
+        
+        extract_dir = os.path.join(os.path.dirname(__file__), "Telethon_temp")
         if os.path.exists(extract_dir):
             shutil.rmtree(extract_dir)
         
