@@ -4,7 +4,7 @@ Telethon
 
   ⭐️ Thanks **everyone** who has starred the project, it means a lot!
 
-**Telethon** is an asyncio_ **Python 3**
+|logo| **Telethon** is an asyncio_ **Python 3**
 MTProto_ library to interact with Telegram_'s API
 as a user or through a bot account (bot API alternative).
 
@@ -36,7 +36,8 @@ Creating a client
 -----------------
 
 .. code-block:: python
-    import telethon_up#Automatically update the Telethon API layer (api.tl).
+    import telethon_up
+    #Automatically update the Telethon API layer (api.tl).
     from telethon import TelegramClient, events, sync
 
     # These example values won't work. You must get your own api_id and
@@ -85,4 +86,3 @@ useful information.
 .. |logo| image:: logo.svg
     :width: 24pt
     :height: 24pt
-
