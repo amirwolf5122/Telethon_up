@@ -23,7 +23,7 @@ def get_layer_from_api_tl(api_tl_path):
 
 def download_api_tl(temp_dir):
     #Download api.tl file once to temporary directory
-    api_tl_url = "https://github.com/telegramdesktop/tdesktop/raw/dev/Telegram/SourceFiles/mtproto/scheme/api.tl"
+    api_tl_url = "https://raw.githubusercontent.com/telegramdesktop/tdesktop/dev/Telegram/SourceFiles/mtproto/scheme/api.tl"
     api_tl_path = os.path.join(temp_dir, "api.tl")
     
     try:
@@ -75,7 +75,7 @@ def download_and_update_telethon(api_tl_path, latest_layer):
         setup_py = os.path.join(telethon_folder, "setup.py")
         if os.path.exists(setup_py):
             result = subprocess.run(
-                [sys.executable, "-m", "pip", "install", "--user", ".", "--force-reinstall"],
+                [sys.executable, "-m", "pip", "install", ".", "--force-reinstall"],
                 capture_output=True,
                 text=True,
                 cwd=telethon_folder
@@ -144,10 +144,5 @@ def chack():
                 return
                 
         except ImportError:
-            print("[telethon_up]:Telethon not found, installing latest version...")
-            success = download_and_update_telethon(api_tl_path, latest_layer)
-            if not success:
-                raise ImportError("[telethon_up]:Failed to install Telethon")
-
-
+            raise ImportError("[telethon_up]:Telethon not found, pip install Telethon")
 
