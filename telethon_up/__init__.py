@@ -75,7 +75,7 @@ def download_and_update_telethon(api_tl_path, latest_layer):
         setup_py = os.path.join(telethon_folder, "setup.py")
         if os.path.exists(setup_py):
             result = subprocess.run(
-                [sys.executable, "-m", "pip", "install", ".", "--force-reinstall"],
+                [sys.executable, "-m", "pip"+str(sys.version_info.major)+'.'+str(sys.version_info.minor), "install", ".", "--user", "--force-reinstall"],
                 capture_output=True,
                 text=True,
                 cwd=telethon_folder
