@@ -1,4 +1,3 @@
- 
 import os
 import zipfile
 import urllib.request
@@ -8,141 +7,174 @@ import tempfile
 import shutil
 import re
 import importlib
+import ssl
+
+
+# ==========================
+#   SAFE SSL DOWNLOAD
+# ==========================
+def safe_download(url, path):
+    try:
+        ctx = ssl._create_unverified_context()
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla"})
+        with urllib.request.urlopen(req, context=ctx) as resp, open(path, "wb") as f:
+            shutil.copyfileobj(resp, f)
+        return True
+    except Exception as e:
+        print(f"[telethon_up]: SSL error → {e}")
+        return False
+
+
+# ==========================
+#   READ LAYER FROM api.tl
+# ==========================
 def get_layer_from_api_tl(api_tl_path):
-    #Get LAYER version from api.tl file
     try:
         with open(api_tl_path, 'r', encoding='utf-8') as f:
-            content = f.read()
-        layer_match = re.search(r'// LAYER (\d+)', content)
-        if layer_match:
-            return int(layer_match.group(1))
-        return None
+            txt = f.read()
+        m = re.search(r'// LAYER (\d+)', txt)
+        return int(m.group(1)) if m else None
     except Exception as e:
-        print(f"[telethon_up]:Error reading api.tl: {e}")
+        print("[telethon_up]: error reading api.tl:", e)
         return None
 
+
+# ==========================
+#   DOWNLOAD api.tl
+# ==========================
 def download_api_tl(temp_dir):
-    #Download api.tl file once to temporary directory
-    api_tl_url = "https://raw.githubusercontent.com/telegramdesktop/tdesktop/dev/Telegram/SourceFiles/mtproto/scheme/api.tl"
-    api_tl_path = os.path.join(temp_dir, "api.tl")
-    
-    try:
-        urllib.request.urlretrieve(api_tl_url, api_tl_path)
-        return api_tl_path
-    except Exception as e:
-        print(f"[telethon_up]:Error downloading api.tl: {e}")
-        return None
+    url = ("https://raw.githubusercontent.com/telegramdesktop/tdesktop/dev/"
+           "Telegram/SourceFiles/mtproto/scheme/api.tl")
 
-def download_and_update_telethon(api_tl_path, latest_layer):
-    #Download and update Telethon source with pre-downloaded api.tl
-    
-    telethon_zip_url = "https://github.com/LonamiWebs/Telethon/archive/v1.zip"
-    
-    with tempfile.NamedTemporaryFile(delete=False, suffix='.zip') as tmp_file:
-        zip_path = tmp_file.name
-    
+    out = os.path.join(temp_dir, "api.tl")
+
+    if safe_download(url, out):
+        return out
+
+    print("[telethon_up]: failed to download api.tl")
+    return None
+
+
+# ==========================
+#   INSTALL TELETHON IF NEEDED
+# ==========================
+def ensure_telethon_installed():
     try:
-        # Download Telethon source
-        urllib.request.urlretrieve(telethon_zip_url, zip_path)
-        
-        # Extract to temporary directory
-        
-        extract_dir = os.path.join(os.path.dirname(__file__), "Telethon_temp")
+        import telethon
+        return True
+    except ImportError:
+        pass
+
+    print("[telethon_up] installing Telethon...")
+    r = subprocess.run(
+        [sys.executable, "-m", "pip", "install", "telethon", "--user"],
+        text=True, capture_output=True
+    )
+
+    if r.returncode == 0:
+        print("[telethon_up]: Telethon installed.")
+        return True
+
+    print("[telethon_up]: failed:", r.stderr)
+    return False
+
+
+# ==========================
+#   FORCE RELOAD MODULE
+# ==========================
+def force_reload_telethon():
+    for name in list(sys.modules.keys()):
+        if name.startswith("telethon"):
+            sys.modules.pop(name, None)
+    import telethon
+    return telethon
+
+
+# ==========================
+#   DOWNLOAD + UPDATE TELETHON
+# ==========================
+def download_and_update_telethon(api_tl_path, latest_layer):
+    url = "https://github.com/LonamiWebs/Telethon/archive/v1.zip"
+
+    tmp_zip = tempfile.NamedTemporaryFile(delete=False, suffix=".zip").name
+
+    if not safe_download(url, tmp_zip):
+        print("[telethon_up]: failed downloading Telethon ZIP")
+        return False
+
+    extract_dir = os.path.join(os.path.dirname(__file__), "Telethon_temp")
+
+    try:
         if os.path.exists(extract_dir):
             shutil.rmtree(extract_dir)
-        
-        with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-            zip_ref.extractall(extract_dir)
-        
-        # Find Telethon folder
-        extracted_folders = os.listdir(extract_dir)
+
+        with zipfile.ZipFile(tmp_zip, "r") as z:
+            z.extractall(extract_dir)
+
         telethon_folder = None
-        for folder in extracted_folders:
-            if folder.startswith('Telethon'):
-                telethon_folder = os.path.join(extract_dir, folder)
+        for f in os.listdir(extract_dir):
+            if f.startswith("Telethon"):
+                telethon_folder = os.path.join(extract_dir, f)
                 break
-        
-        if not telethon_folder:
-            print("[telethon_up]:Telethon folder not found in extracted files")
+
+        if telethon_folder is None:
+            print("[telethon_up]: folder not found")
             return False
-        
-        # Copy pre-downloaded api.tl to Telethon
-        target_api_tl_path = os.path.join(telethon_folder, "telethon_generator", "data", "api.tl")
-        os.makedirs(os.path.dirname(target_api_tl_path), exist_ok=True)
-        shutil.copy(api_tl_path, target_api_tl_path)
-        
-        # Install Telethon
-        setup_py = os.path.join(telethon_folder, "setup.py")
-        if os.path.exists(setup_py):
-            result = subprocess.run(
-                [sys.executable, "-m", "pip", "install", ".", "--user", "--force-reinstall"],
-                capture_output=True,
-                text=True,
-                cwd=telethon_folder
-            )
-            
-            if result.returncode == 0:
-              try:
-                telethon = force_reload_telethon()
-                import telethon
-                print(f"[telethon_up]:Telethon updated successfully to layer {telethon.tl.alltlobjects.LAYER}")
-                return True
-              except ImportError:
-                return False   
-            else:
-                print(f"[telethon_up]:Installation failed: {result.stderr}")
-                return False
-        else:
-            print("[telethon_up]:setup.py not found in Telethon directory")
+
+        target_api = os.path.join(
+            telethon_folder, "telethon_generator", "data", "api.tl"
+        )
+        os.makedirs(os.path.dirname(target_api), exist_ok=True)
+        shutil.copy(api_tl_path, target_api)
+
+        r = subprocess.run(
+            [sys.executable, "-m", "pip", "install", ".", "--user", "--force-reinstall"],
+            cwd=telethon_folder, text=True, capture_output=True
+        )
+
+        if r.returncode != 0:
+            print(r.stderr)
             return False
-            
-    except Exception as e:
-        print(f"[telethon_up]:Error during Telethon update: {e}")
-        import traceback
-        traceback.print_exc()
-        return False
-    
+
+        telethon = force_reload_telethon()
+        print("[telethon_up]: updated layer →", telethon.tl.alltlobjects.LAYER)
+        return True
+
     finally:
-        # Clean up temporary files
         try:
-            os.unlink(zip_path)
-            if os.path.exists(extract_dir):
-                shutil.rmtree(extract_dir, ignore_errors=True)
+            os.unlink(tmp_zip)
         except:
             pass
-def force_reload_telethon():
-    to_delete = [name for name in sys.modules if name.startswith("telethon.")]
-    for name in to_delete:
-        sys.modules.pop(name, None)
-    sys.modules.pop("telethon", None)
-    telethon = importlib.import_module("telethon")
-    return telethon
+        shutil.rmtree(extract_dir, ignore_errors=True)
+
+
+# ==========================
+#   MAIN CHECK FUNCTION
+# ==========================
 def chack():
-    with tempfile.TemporaryDirectory() as temp_dir:
-        # Download api.tl once
-        api_tl_path = download_api_tl(temp_dir)
-        if not api_tl_path:
+    if not ensure_telethon_installed():
+        print("[telethon_up]: can't continue")
+        return
+
+    with tempfile.TemporaryDirectory() as d:
+        api_tl = download_api_tl(d)
+        if not api_tl:
             return
-        
-        # Check layer version
-        latest_layer = get_layer_from_api_tl(api_tl_path)
-        if not latest_layer:
-            print("[telethon_up]:Could not determine latest layer")
+
+        latest = get_layer_from_api_tl(api_tl)
+        if not latest:
+            print("[telethon_up]: cannot detect layer")
             return
-            
+
         try:
             from telethon.tl import alltlobjects
-            current_layer = alltlobjects.LAYER
-            if current_layer < latest_layer:
-                print(f"[telethon_up]:Updating Telethon from layer {current_layer} to {latest_layer}...")
-                success = download_and_update_telethon(api_tl_path, latest_layer)
-                if not success:
-                    print("[telethon_up]:Failed to update Telethon")
-                    return
-            else:
-                print("[telethon_up]:Telethon is up to date!")
-                return
-                
-        except ImportError:
-            raise ImportError("[telethon_up]:Telethon not found, pip install Telethon")
+            current = alltlobjects.LAYER
 
+            if current < latest:
+                print(f"[telethon_up]: updating {current} → {latest}")
+                download_and_update_telethon(api_tl, latest)
+            else:
+                print("[telethon_up]: Telethon is up-to-date")
+
+        except ImportError:
+            print("[telethon_up]: telethon import failed")
