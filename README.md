@@ -26,9 +26,12 @@ pip3 install telethon-up
 
 ```python
 import telethon_up
-telethon_up.chack()
-# Automatically update the Telethon API layer (api.tl).
 from telethon import TelegramClient, events, sync
+#import telethon
+#print(f"Layer Start: {telethon.tl.alltlobjects.LAYER}")
+telethon_up.check()
+#print(f"Layer After: {telethon.tl.alltlobjects.LAYER}")
+# Automatically update the Telethon API layer (api.tl).
 # These example values won't work. You must get your own api_id and
 # api_hash from https://my.telegram.org, under API Development.
 api_id = 12345
