@@ -113,7 +113,7 @@ def check():
             for url in zip_urls:
                 if safe_download(url, tmp_zip):
                     download_success = True
-                    break
+                    continue
             if download_success:
                 extract_dir = os.path.join(os.path.dirname(__file__), "Telethon_temp")
                 try:
