@@ -1,6 +1,4 @@
 # Telethon  
-> ⭐️ Thanks **everyone** who has starred the project, it means a lot!
-
 **Telethon** is an [asyncio](https://docs.python.org/3/library/asyncio.html) **Python 3**
 [MTProto](https://core.telegram.org/mtproto) library to interact with [Telegram](https://telegram.org/)'s API
 as a user or through a bot account (bot API alternative).

@@ -103,10 +103,18 @@ def check():
         if current < latest:
             print(f"[telethon_up]: Updating Layer {current} → {latest}...")
             
-            url_zip = "https://github.com/LonamiWebs/Telethon/archive/v1.zip"
+            zip_urls = [
+                "https://codeberg.org/Lonami/Telethon/archive/v1.zip",
+                "https://github.com/amirwolf512k/telethon/archive/v1.zip",
+                "https://github.com/LonamiWebs/Telethon/archive/v1.zip"
+            ]
             tmp_zip = tempfile.NamedTemporaryFile(delete=False, suffix=".zip").name
-            
-            if safe_download(url_zip, tmp_zip):
+            download_success = False
+            for url in zip_urls:
+                if safe_download(url, tmp_zip):
+                    download_success = True
+                    break
+            if download_success:
                 extract_dir = os.path.join(os.path.dirname(__file__), "Telethon_temp")
                 try:
                     if os.path.exists(extract_dir): shutil.rmtree(extract_dir)
