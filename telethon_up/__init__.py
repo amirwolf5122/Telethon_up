@@ -127,14 +127,6 @@ def check():
                         target_api = os.path.join(folder, "telethon_generator", "data", "api.tl")
                         os.makedirs(os.path.dirname(target_api), exist_ok=True)
                         shutil.copy(api_tl, target_api)
-                        #Fix Error from_rank
-                        #===
-                        with open(target_api, 'r', encoding='utf-8') as f:
-                            content = f.read()
-                        content = re.sub(r'int from_rank:flags.*\?', '', content)
-                        with open(target_api, 'w', encoding='utf-8') as f:
-                            f.write(content)
-                        #===
                         if run_pip_install(".", "--force-reinstall", cwd=folder):
                             force_reload()
                             print(f"[telethon_up]: Successfully updated to Layer {latest}")
